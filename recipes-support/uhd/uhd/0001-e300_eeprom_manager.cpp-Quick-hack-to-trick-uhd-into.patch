@@ -1,0 +1,46 @@
+From e6ff4aed89abede17fe022894515c2d2159ae393 Mon Sep 17 00:00:00 2001
+From: Philip Balister <philip@balister.org>
+Date: Fri, 13 Oct 2017 08:35:20 -0400
+Subject: [PATCH] e300_eeprom_manager.cpp: Quick hack to trick uhd into seems a
+ db eeprom.
+
+ * The ER300 doesn't have a daughterboard eeprom, so return some values
+   to make UHD think it is an E300 db.
+
+Signed-off-by: Philip Balister <philip@balister.org>
+---
+ host/lib/usrp/e300/e300_eeprom_manager.cpp | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/host/lib/usrp/e300/e300_eeprom_manager.cpp b/host/lib/usrp/e300/e300_eeprom_manager.cpp
+index d43ca3d..9bd89b7 100644
+--- a/host/lib/usrp/e300/e300_eeprom_manager.cpp
++++ b/host/lib/usrp/e300/e300_eeprom_manager.cpp
+@@ -93,18 +93,16 @@ const dboard_eeprom_t& e300_eeprom_manager::read_db_eeprom(void)
+     memset(map_ptr, 0xff, sizeof(db_eeprom_map_t));
+ 
+     // get the old contents
+-    for(size_t i = 0; i < sizeof(db_eeprom_map_t); i++)
+-        bytes[i] = _i2c->get_i2c_reg16(DB_ADDR, i);
++//    for(size_t i = 0; i < sizeof(db_eeprom_map_t); i++)
++//        bytes[i] = _i2c->get_i2c_reg16(DB_ADDR, i);
+ 
+-    db_eeprom_map_t &map = *map_ptr;
++//    db_eeprom_map_t &map = *map_ptr;
+ 
+-    _db_eeprom.id = uhd::usrp::dboard_id_t::from_uint16(
+-        uhd::ntohx<uint16_t>(map.hw_product));
++    _db_eeprom.id = uhd::usrp::dboard_id_t::from_string("0x0100");
+ 
+     _db_eeprom.revision = boost::lexical_cast<std::string>(
+-        uhd::ntohx<uint16_t>(map.hw_revision));
+-    _db_eeprom.serial = _bytes_to_string(
+-        map.serial, DB_SERIAL_LEN);
++        uhd::ntohx<uint16_t>(0x5678));
++    _db_eeprom.serial = "ABCDEFGH";
+ 
+     return _db_eeprom;
+ }
+-- 
+2.7.5
+
